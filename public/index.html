@@ -124,39 +124,27 @@
       }
 
       // Send message
-async function sendMessage() {
-  const message = userInput.value.trim();
-  if (!message) return;
-  addMessage(message, true); // Show user message
-  userInput.value = "";
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+        addMessage(message, true);
+        userInput.value = "";
 
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-  prompt: message,
-  systemPrompt: "You are Coach Joel AI, a leadership coach who gives concise motivational answers for every Linkers."
-})
-    });
+        try {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: message })
+          });
+          const data = await res.json();
+          addMessage(data.text || "Error: No response", false);
+        } catch (err) {
+          addMessage("Error connecting to server.", false);
+        }
+      }
 
-    if (!res.ok) throw new Error(`Server error: ${res.status}`);
-
-    const data = await res.json();
-    addMessage(data.text || "Error: No response", false); // Show AI reply
-
-  } catch (err) {
-    console.error("❌ Fetch error:", err);
-    addMessage("Error connecting to server.", false);
-  }
-}
-
-// Event listeners
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
+      sendBtn.addEventListener("click", sendMessage);
+      userInput.addEventListener("keydown", e => { if(e.key==="Enter") sendMessage(); });
 
       // === Voice Recording ===
       let mediaRecorder = null, chunks = [], isRecording = false;
@@ -198,6 +186,4 @@ userInput.addEventListener("keydown", e => {
     </script>
   </body>
 </html>
-
-
 
