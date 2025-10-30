@@ -4,7 +4,6 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
 
 dotenv.config(); // Load GEMINI_API_KEY from .env
 
@@ -95,3 +94,4 @@ Constraints:
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
