@@ -53,11 +53,8 @@ Constraints:
 4. If outside scope, politely decline and refer to official resources.
 `;
 
-    // Proper Gemini message format
-    const messages = [
-      { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
-      { role: "user", content: [{ type: "text", text: prompt }] }
-    ];
+    // Concatenate system prompt + user prompt for generateContent
+    const finalPrompt = `${SYSTEM_PROMPT}\nUser: ${prompt}\nCoach Joel AI:`;
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
@@ -68,7 +65,7 @@ Constraints:
           "x-goog-api-key": GEMINI_KEY
         },
         body: JSON.stringify({
-          messages,
+          prompt: finalPrompt,
           temperature: 0.2,
           maxOutputTokens: 1000
         })
@@ -85,7 +82,7 @@ Constraints:
 
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    // Parse the AI response correctly
+    // Correctly parse the AI response
     const text = data?.output?.[0]?.content?.[0]?.text?.trim() || "No response";
 
     res.json({ success: true, text });
