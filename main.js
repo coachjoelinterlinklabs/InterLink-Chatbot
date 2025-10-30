@@ -53,11 +53,9 @@ Constraints:
 4. If outside scope, politely decline and refer to official resources.
 `;
 
-    // Concatenate system prompt + user prompt for generateContent
-    const finalPrompt = `${SYSTEM_PROMPT}\nUser: ${prompt}\nCoach Joel AI:`;
-
+    // Use Gemini Chat API
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-chat:generateMessage",
       {
         method: "POST",
         headers: {
@@ -65,9 +63,13 @@ Constraints:
           "x-goog-api-key": GEMINI_KEY
         },
         body: JSON.stringify({
-          prompt: finalPrompt,
+          messages: [
+            { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
+            { role: "user", content: [{ type: "text", text: prompt }] }
+          ],
           temperature: 0.2,
-          maxOutputTokens: 1000
+          candidateCount: 1,
+          topP: 0.95
         })
       }
     );
@@ -82,8 +84,8 @@ Constraints:
 
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    // Correctly parse the AI response
-    const text = data?.output?.[0]?.content?.[0]?.text?.trim() || "No response";
+    // Extract the AI response text
+    const text = data?.candidates?.[0]?.message?.content?.[0]?.text?.trim() || "No response";
 
     res.json({ success: true, text });
 
