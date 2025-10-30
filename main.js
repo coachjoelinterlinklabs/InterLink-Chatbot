@@ -54,7 +54,7 @@ app.post("/api/generate", async (req, res) => {
         },
         body: JSON.stringify({
           contents,
-          generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
+          generationConfig: { temperature: 0.2, maxOutputTokens: 50000 }
         })
       }
     );
@@ -76,3 +76,4 @@ app.post("/api/generate", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
