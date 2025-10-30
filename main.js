@@ -38,36 +38,33 @@ Style rules:
 - End with encouragement
 `;
 
-    // GenerateContent payload
-    const payload = {
-      contents: [
-        { role: "system", parts: [{ text: SYSTEM_PROMPT }] },
-        { role: "user", parts: [{ text: prompt }] }
+    const body = {
+      messages: [
+        { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
+        { role: "user", content: [{ type: "text", text: prompt }] }
       ],
-      generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 1000
-      }
+      temperature: 0.2,
+      candidateCount: 1,
+      topP: 0.95
     };
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-chat:generateMessage",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": GEMINI_KEY
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(body)
       }
     );
 
     const data = await response.json();
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    const text =
-      data?.candidates?.[0]?.content?.[0]?.text?.trim() ||
-      "No response from API";
+    // Correct path for Chat API response
+    const text = data?.candidates?.[0]?.message?.content?.[0]?.text?.trim() || "No response from API";
 
     res.json({ success: true, text });
 
