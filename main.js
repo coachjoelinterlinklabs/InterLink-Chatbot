@@ -10,21 +10,15 @@ dotenv.config(); // Load GEMINI_API_KEY from .env
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log("🟢 Starting main.js...");
-
 const app = express();
 
 // Middleware
 app.use(express.json({ limit: "1mb" }));
-
-// Allow CORS for frontend
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
-
-// Serve static frontend
 app.use(express.static(path.join(__dirname, "public")));
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -35,7 +29,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// API endpoint for your bot
+// API endpoint
 app.post("/api/generate", async (req, res) => {
   try {
     const { prompt } = req.body || {};
@@ -59,7 +53,7 @@ Constraints:
 4. If outside scope, politely decline and refer to official resources.
 `;
 
-    // Proper Gemini v1 format
+    // Proper Gemini message format
     const messages = [
       { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
       { role: "user", content: [{ type: "text", text: prompt }] }
@@ -91,10 +85,8 @@ Constraints:
 
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    // Read AI response correctly
-    const text =
-      data?.candidates?.[0]?.content?.[0]?.text ||
-      "No response";
+    // Parse the AI response correctly
+    const text = data?.output?.[0]?.content?.[0]?.text?.trim() || "No response";
 
     res.json({ success: true, text });
 
