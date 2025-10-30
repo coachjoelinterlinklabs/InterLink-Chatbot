@@ -10,12 +10,14 @@ dotenv.config(); // Load GEMINI_API_KEY from .env
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+console.log("🟢 Starting main.js...");
+
 const app = express();
 
 // Middleware
 app.use(express.json({ limit: "1mb" }));
 
-// Allow CORS for frontend (adjust origin if needed)
+// Allow CORS for frontend
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "OPTIONS"],
@@ -63,24 +65,33 @@ Constraints:
       { role: "user", text: prompt }
     ];
 
+    // Use native fetch (Node 18+)
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": GEMINI_KEY
         },
         body: JSON.stringify({
-          messages,                 // <-- use messages, not contents
+          messages,               // Correct structure
           temperature: 0.2,
-          maxOutputTokens: 1000     // 1k tokens
+          maxOutputTokens: 1000
         })
       }
     );
 
-    const data = await response.json();
-    console.log("Raw API response:", JSON.stringify(data, null, 2)); // debug
+    // Parse response safely
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonErr) {
+      console.error("❌ Error parsing JSON:", jsonErr);
+      return res.status(500).json({ success: false, error: "Invalid JSON from API" });
+    }
+
+    console.log("Raw API response:", JSON.stringify(data, null, 2)); // Debug
 
     const text =
       data?.candidates?.[0]?.content?.[0]?.text ||
@@ -95,3 +106,10 @@ Constraints:
   }
 });
 
+// Start server
+try {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+} catch (err) {
+  console.error("❌ Server failed to start:", err);
+}
