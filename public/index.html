@@ -134,7 +134,10 @@ async function sendMessage() {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: message })
+      body: JSON.stringify({
+  prompt: message,
+  systemPrompt: "You are Coach Joel AI, a leadership coach who gives concise motivational answers for every Linkers."
+})
     });
 
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -195,5 +198,6 @@ userInput.addEventListener("keydown", e => {
     </script>
   </body>
 </html>
+
 
 
