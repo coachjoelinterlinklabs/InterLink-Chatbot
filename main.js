@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
-dotenv.config(); // Load GEMINI_API_KEY from .env
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,11 +14,7 @@ const app = express();
 
 // Middleware
 app.use(express.json({ limit: "1mb" }));
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
+app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -29,10 +25,9 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// API endpoint
 app.post("/api/generate", async (req, res) => {
   try {
-    const { prompt } = req.body || {};
+    const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ success: false, error: "Missing prompt" });
 
     const SYSTEM_PROMPT = `
@@ -53,7 +48,20 @@ Constraints:
 4. If outside scope, politely decline and refer to official resources.
 `;
 
-    // Use Gemini Chat API
+    // Gemini Chat request payload
+    const payload = {
+      messages: [
+        { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
+        { role: "user", content: [{ type: "text", text: prompt }] }
+      ],
+      responseConfig: {
+        temperature: 0.2,
+        topP: 0.95,
+        candidateCount: 1,
+        maxOutputTokens: 1000
+      }
+    };
+
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-chat:generateMessage",
       {
@@ -62,30 +70,16 @@ Constraints:
           "Content-Type": "application/json",
           "x-goog-api-key": GEMINI_KEY
         },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
-            { role: "user", content: [{ type: "text", text: prompt }] }
-          ],
-          temperature: 0.2,
-          candidateCount: 1,
-          topP: 0.95
-        })
+        body: JSON.stringify(payload)
       }
     );
 
-    let data;
-    try {
-      data = await response.json();
-    } catch (jsonErr) {
-      console.error("❌ Error parsing JSON:", jsonErr);
-      return res.status(500).json({ success: false, error: "Invalid JSON from API" });
-    }
-
+    const data = await response.json();
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    // Extract the AI response text
-    const text = data?.candidates?.[0]?.message?.content?.[0]?.text?.trim() || "No response";
+    // Extract AI text
+    const text = data?.candidates?.[0]?.message?.content?.[0]?.text?.trim();
+    if (!text) return res.json({ success: false, text: "No response from API" });
 
     res.json({ success: true, text });
 
@@ -95,10 +89,5 @@ Constraints:
   }
 });
 
-// Start server
-try {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-} catch (err) {
-  console.error("❌ Server failed to start:", err);
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
