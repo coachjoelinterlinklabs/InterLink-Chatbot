@@ -70,7 +70,7 @@ app.post("/api/generate", async (req, res) => {
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": GEMINI_KEY
         },
@@ -83,10 +83,17 @@ app.post("/api/generate", async (req, res) => {
 
     const data = await response.json();
 
-    const text =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      data?.output?.[0]?.contents?.[0]?.parts?.[0]?.text ||
-      "No response";
+    // Log the raw API response for debugging
+    console.log("📄 Gemini API Response:", JSON.stringify(data, null, 2));
+
+    // Extract text from multiple possible paths
+    let text = "No response";
+
+    if (data?.candidates?.length > 0) {
+      text = data.candidates[0]?.content?.parts?.map(p => p.text).join("\n") || text;
+    } else if (data?.output?.length > 0) {
+      text = data.output[0]?.contents?.map(c => c.parts.map(p => p.text).join("\n")).join("\n") || text;
+    }
 
     res.json({ success: true, text });
   } catch (err) {
@@ -95,6 +102,8 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
