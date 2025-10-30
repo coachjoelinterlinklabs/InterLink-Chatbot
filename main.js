@@ -38,14 +38,6 @@ app.get("/", (req, res) => {
 app.post("/api/generate", async (req, res) => {
   try {
     const { prompt, systemPrompt } = req.body || {};
-
-const rolePrompt = systemPrompt || `
-You are Coach Joel AI, an inspiring and practical leadership coach developed by InterLink Labs.
-Your role is to guide users in leadership, productivity, communication, and mindset improvement.
-You always speak in a supportive and motivational tone, offering actionable insights.
-If a user asks something unrelated to coaching, answer politely but guide the conversation back to growth or leadership topics.
-`;
-
     if (!prompt) return res.status(400).json({ success: false, error: "Missing prompt" });
 
     const contents = [];
@@ -62,7 +54,7 @@ If a user asks something unrelated to coaching, answer politely but guide the co
         },
         body: JSON.stringify({
           contents,
-          generationConfig: { temperature: 0.2, maxOutputTokens: 5000 }
+          generationConfig: { temperature: 0.2, maxOutputTokens: 1000 }
         })
       }
     );
@@ -84,6 +76,4 @@ If a user asks something unrelated to coaching, answer politely but guide the co
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-
 
