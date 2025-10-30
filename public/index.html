@@ -3,58 +3,123 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat bot</title>
+    <title>InterLink Chatbot</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        theme: {
-          extend: {},
-        },
+        theme: { extend: {} },
       };
     </script>
   </head>
-  <body>
-    <main class="main-area">
-      <div class="main-container">
-        <div class="header">
-          <div class="header-content">
-            <div class="logo-container">
-              <img
-                src="https://public.interlinklabs.ai/1761665406060_Logo.png"
-                alt="" />
-            </div>
-            <h1 class="font-semibold text-[18px]">InterLink Chatbot</h1>
+  <body class="bg-black flex items-center justify-center min-h-screen">
+    
+    <!-- Login / Get Started Section -->
+    <div id="login-section" class="main-container">
+      <div class="header">
+        <div class="header-content">
+          <div class="logo-container">
+            <img src="https://public.interlinklabs.ai/1761665406060_Logo.png" alt="Logo" />
           </div>
-          <button class="header-button">
-            <img
-              src="https://public.interlinklabs.ai/1761665924687_Vector.png"
-              alt=""
-              srcset=""
-              class="header-icon-btn" />
-          </button>
-        </div>
-        <div class="chat-area">
-          <div>
-            <div class="flex flex-col items-center gap-2">
-              <p class="text-[#525866] text-[16px]">👋 Hi there!</p>
-              <h1 class="text-[#0E121B] font-semibold text-[18px]">
-                How can we help you today?
-              </h1>
-            </div>
-            <img
-              src="https://public.interlinklabs.ai/1761666821438_axolink.png"
-              alt=""
-              class="object-cover" />
-          </div>
-        </div>
-        <div class="px-[24px] pt-[16px] border-t border-[#E3E6EC]">
-          <button
-            class="w-full py-[10px] px-[16px] bg-[#6962F1] rounded-[12px] text-white">
-            Get Started
-          </button>
+          <h1 class="font-semibold text-[18px]">InterLink Chatbot</h1>
         </div>
       </div>
-    </main>
+      <div class="chat-area flex flex-col items-center gap-4">
+        <p class="text-[#525866] text-[16px]">👋 Hi there!</p>
+        <h1 class="text-[#0E121B] font-semibold text-[18px]">
+          Login or Get Started
+        </h1>
+      </div>
+      <div class="px-[24px] pt-[16px] border-t border-[#E3E6EC]">
+        <button id="btn-get-started"
+          class="w-full py-[10px] px-[16px] bg-[#6962F1] rounded-[12px] text-white">
+          Get Started
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Section (Hidden Initially) -->
+    <div id="chat-section" class="main-container hidden flex flex-col">
+      <div class="header">
+        <div class="header-content">
+          <div class="logo-container">
+            <img src="https://public.interlinklabs.ai/1761665406060_Logo.png" alt="Logo" />
+          </div>
+          <h1 class="font-semibold text-[18px]">Chat with InterLink AI</h1>
+        </div>
+      </div>
+
+      <div id="chat-output" class="chat-area overflow-y-auto flex-1 flex flex-col gap-3 p-4">
+        <div class="flex flex-col items-center gap-2">
+          <p class="text-[#525866] text-[16px]">👋 Hi there!</p>
+          <h1 class="text-[#0E121B] font-semibold text-[18px]">
+            How can we help you today?
+          </h1>
+        </div>
+      </div>
+
+      <div class="px-[24px] pt-[16px] border-t border-[#E3E6EC] flex items-center gap-3">
+        <input id="user-message" type="text"
+          placeholder="Ask Anything"
+          class="flex-1 rounded-full py-3 px-4 text-[14px] outline-none" />
+        <button id="btn-send-message"
+          class="shrink-0 w-[32px] h-[32px]">
+          <img src="https://public.interlinklabs.ai/1761722579694_send.png" alt="Send" />
+        </button>
+      </div>
+    </div>
+
+    <!-- JS for Chat & Backend -->
+    <script>
+      const loginSection = document.getElementById("login-section");
+      const chatSection = document.getElementById("chat-section");
+      const getStartedBtn = document.getElementById("btn-get-started");
+      const sendBtn = document.getElementById("btn-send-message");
+      const userInput = document.getElementById("user-message");
+      const chatOutput = document.getElementById("chat-output");
+
+      // Show chat section
+      getStartedBtn.addEventListener("click", () => {
+        loginSection.classList.add("hidden");
+        chatSection.classList.remove("hidden");
+      });
+
+      // Add message to chat
+      function addMessage(text, isUser = true) {
+        const div = document.createElement("div");
+        div.className = isUser
+          ? "self-end bg-[#6962F1] text-white px-4 py-2 rounded-xl max-w-[70%]"
+          : "self-start bg-[#F5F7FA] text-[#0E121B] px-4 py-2 rounded-xl max-w-[70%]";
+        div.textContent = text;
+        chatOutput.appendChild(div);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+      }
+
+      // Send message to backend
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+        addMessage(message, true);
+        userInput.value = "";
+
+        try {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: message })
+          });
+          const data = await res.json();
+          if (data.success) addMessage(data.text, false);
+          else addMessage("Error: " + data.error, false);
+        } catch (err) {
+          addMessage("Error connecting to server.", false);
+        }
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      userInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+    </script>
   </body>
 </html>
