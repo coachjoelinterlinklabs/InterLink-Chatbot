@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InterLink Chatbot</title>
+    <title>InterLink AI Chatbot</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -19,15 +19,23 @@
           <div class="logo-container">
             <img src="https://public.interlinklabs.ai/1761665406060_Logo.png" alt="Logo" />
           </div>
-          <h1 class="font-semibold text-[18px]">InterLink Chatbot</h1>
+          <h1 class="font-semibold text-[18px]">InterLink Coach Joel AI</h1>
         </div>
       </div>
-      <div class="chat-area flex flex-col items-center gap-4">
-        <p class="text-[#525866] text-[16px]">👋 Hi there!</p>
-        <h1 class="text-[#0E121B] font-semibold text-[18px]">
-          Click "Get Started" to start your journey!
-        </h1>
-      </div>
+     <div class="chat-area">
+          <div>
+            <div class="flex flex-col items-center gap-2">
+              <p class="text-[#525866] text-[16px]">👋 Hi there!</p>
+              <h1 class="text-[#0E121B] font-semibold text-[18px]">
+                How can we help you today?
+              </h1>
+            </div>
+            <img
+              src="https://public.interlinklabs.ai/1761666821438_axolink.png"
+              alt=""
+              class="object-cover" />
+          </div>
+        </div>
       <div class="px-[24px] pt-[16px] border-t border-[#E3E6EC]">
         <button id="btn-get-started"
           class="w-full py-[10px] px-[16px] bg-[#6962F1] rounded-[12px] text-white">
@@ -49,7 +57,14 @@
 
       <div id="chat-output" class="chat-area overflow-y-auto flex-1 flex flex-col gap-3 p-4">
         <!-- Initial bot message -->
-        <div class="flex items-center gap-2 w-full">
+       
+          <div>
+            <img
+              src="https://public.interlinklabs.ai/1761666821438_axolink.png"
+              alt=""
+              class="object-cover" />
+          </div>
+       <div class="flex items-center gap-2 w-full">
           <img src="https://public.interlinklabs.ai/1761722972563_avt.png" alt=""
                class="w-10 h-10 rounded-full" />
           <div class="px-4 py-[10px] max-w-[70%] bg-[#F5F7FA] text-[#0E121B] rounded-[16px] rounded-bl-[8px]">
