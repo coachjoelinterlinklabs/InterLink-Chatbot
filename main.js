@@ -12,7 +12,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware
 app.use(express.json({ limit: "1mb" }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
@@ -20,7 +19,6 @@ app.use(express.static(path.join(__dirname, "public")));
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_KEY) console.warn("⚠️ GEMINI_API_KEY not set!");
 
-// Serve index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -31,39 +29,29 @@ app.post("/api/generate", async (req, res) => {
     if (!prompt) return res.status(400).json({ success: false, error: "Missing prompt" });
 
     const SYSTEM_PROMPT = `
-Primary Function: You are Coach Joel AI who helps the InterLink Community, especially Global Ambassadors, with inquiries, issues, and requests in the InterLink Community and Ambassador Program Level 5 System. You aim to provide excellent, friendly, and efficient replies at all times. Listen attentively to the user, understand their needs, and assist or direct them to appropriate resources. If a question is unclear, ask clarifying questions. End replies with a positive note.
+Primary Function: You are Coach Joel AI who helps the InterLink Community, especially Global Ambassadors. Provide friendly and efficient replies, ask clarifying questions if unclear, and end on a positive note.
 
 Style rules:
-- Be concise, professional, and direct. Do not use asterisks (*) or markdown bold syntax (**).
-- Use plain text for emphasis, such as ALL CAPS, or emoji bullets for clarity (✅, 🔹, 🔸, 📌).
-- When listing steps or winners, use numbered lists (1., 2., 3.) or emoji bullets, not asterisks or markdown.
-- Use spacing and margins for clarity without asterisks.
-- End with a brief encouraging sentence.
-- If sending a link, analyze whether it is legit and official in InterLink. If uncertain, ask the user if they want to explore it and provide your advice.
-
-Constraints:
-1. Use multiple languages if the user wants translation.
-2. Stay focused on InterLink Labs Project. You may research it yourself and/or give feedback using the points system in the InterLink Coach House White Paper.
-3. If information is missing, ask a clarifying question.
-4. If outside scope, politely decline and refer to official resources.
+- Concise, professional, direct
+- Use plain text or emoji bullets (✅, 🔹, 🔸)
+- Numbered lists 1., 2., 3. instead of asterisks
+- End with encouragement
 `;
 
-    // Gemini Chat request payload
+    // GenerateContent payload
     const payload = {
-      messages: [
-        { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
-        { role: "user", content: [{ type: "text", text: prompt }] }
+      contents: [
+        { role: "system", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "user", parts: [{ text: prompt }] }
       ],
-      responseConfig: {
+      generationConfig: {
         temperature: 0.2,
-        topP: 0.95,
-        candidateCount: 1,
         maxOutputTokens: 1000
       }
     };
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-chat:generateMessage",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
         headers: {
@@ -77,9 +65,9 @@ Constraints:
     const data = await response.json();
     console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-    // Extract AI text
-    const text = data?.candidates?.[0]?.message?.content?.[0]?.text?.trim();
-    if (!text) return res.json({ success: false, text: "No response from API" });
+    const text =
+      data?.candidates?.[0]?.content?.[0]?.text?.trim() ||
+      "No response from API";
 
     res.json({ success: true, text });
 
