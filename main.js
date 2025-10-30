@@ -59,13 +59,12 @@ Constraints:
 4. If outside scope, politely decline and refer to official resources.
 `;
 
-    // Gemini expects "messages" array with role + text
+    // Proper Gemini v1 format
     const messages = [
-      { role: "system", text: SYSTEM_PROMPT },
-      { role: "user", text: prompt }
+      { role: "system", content: [{ type: "text", text: SYSTEM_PROMPT }] },
+      { role: "user", content: [{ type: "text", text: prompt }] }
     ];
 
-    // Use native fetch (Node 18+)
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
@@ -75,14 +74,13 @@ Constraints:
           "x-goog-api-key": GEMINI_KEY
         },
         body: JSON.stringify({
-          messages,               // Correct structure
+          messages,
           temperature: 0.2,
           maxOutputTokens: 1000
         })
       }
     );
 
-    // Parse response safely
     let data;
     try {
       data = await response.json();
@@ -91,11 +89,11 @@ Constraints:
       return res.status(500).json({ success: false, error: "Invalid JSON from API" });
     }
 
-    console.log("Raw API response:", JSON.stringify(data, null, 2)); // Debug
+    console.log("Raw API response:", JSON.stringify(data, null, 2));
 
+    // Read AI response correctly
     const text =
       data?.candidates?.[0]?.content?.[0]?.text ||
-      data?.output?.[0]?.content?.[0]?.text ||
       "No response";
 
     res.json({ success: true, text });
