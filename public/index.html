@@ -106,54 +106,22 @@
       });
 
       // Add message
-      <script>
-function addMessage(text, isUser = true) {
-  // Convert URLs in text to clickable links
-  function linkify(text) {
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlPattern, url => `<a href="${url}" target="_blank" class="text-blue-500 underline">${url}</a>`);
-  }
-
-  const divWrapper = document.createElement("div");
-  divWrapper.className = `flex items-center gap-2 w-full ${isUser ? 'flex-row-reverse' : ''}`;
-  
-  const img = document.createElement("img");
-  img.src = isUser
-    ? "https://public.interlinklabs.ai/1761665406060_Logo.png"
-    : "https://public.interlinklabs.ai/1761722972563_avt.png";
-  img.className = "w-10 h-10 rounded-full";
-  
-  const bubble = document.createElement("div");
-  bubble.className = `px-4 py-[10px] max-w-[70%] rounded-[16px] ${isUser ? 'bg-[#1A1A1A] text-white rounded-br-[8px]' : 'bg-[#F5F7FA] text-[#0E121B] rounded-bl-[8px]'}`;
-  
-  // Insert AI system prompt at first load
-  if (!isUser && text === "__SYSTEM_PROMPT__") {
-    text = `
-Primary Function: You are Coach Joel AI who helps the InterLink Community, especially Global Ambassadors, with inquiries, issues, and requests in the InterLink Community and Ambassador Program Level 5 System. You aim to provide excellent, friendly, and efficient replies at all times. Listen attentively to the user, understand their needs, and assist or direct them to appropriate resources. If a question is unclear, ask clarifying questions. End replies with a positive note.
-
-Style rules:
-- Be concise, professional, and direct. Do not use asterisks (*) or markdown bold syntax (**).
-- Use plain text for emphasis, such as ALL CAPS, or emoji bullets for clarity (✅, 🔹, 🔸, 📌).
-- When listing steps or winners, use numbered lists (1., 2., 3.) or emoji bullets, not asterisks or markdown.
-- Use spacing and margins for clarity without asterisks.
-- End with a brief encouraging sentence.
-- If sending a link, analyze whether it is legit and official in InterLink. If uncertain, ask the user if they want to explore it and provide your advice.
-
-Constraints:
-1. Use multiple languages if the user wants translation.
-2. Stay focused on InterLink Labs Project. You may research it yourself and/or give feedback using the points system in the InterLink Coach House White Paper.
-3. If information is missing, ask a clarifying question.
-4. If outside scope, politely decline and refer to official resources.
-    `;
-  }
-
-  bubble.innerHTML = linkify(text);
-  divWrapper.appendChild(img);
-  divWrapper.appendChild(bubble);
-  chatOutput.appendChild(divWrapper);
-  chatOutput.scrollTop = chatOutput.scrollHeight;
-}
-</script>
+      function addMessage(text, isUser = true) {
+        const divWrapper = document.createElement("div");
+        divWrapper.className = `flex items-center gap-2 w-full ${isUser ? 'flex-row-reverse' : ''}`;
+        const img = document.createElement("img");
+        img.src = isUser
+          ? "https://public.interlinklabs.ai/1761665406060_Logo.png"
+          : "https://public.interlinklabs.ai/1761722972563_avt.png";
+        img.className = "w-10 h-10 rounded-full";
+        const bubble = document.createElement("div");
+        bubble.className = `px-4 py-[10px] max-w-[70%] rounded-[16px] ${isUser ? 'bg-[#1A1A1A] text-white rounded-br-[8px]' : 'bg-[#F5F7FA] text-[#0E121B] rounded-bl-[8px]'}`;
+        bubble.textContent = text;
+        divWrapper.appendChild(img);
+        divWrapper.appendChild(bubble);
+        chatOutput.appendChild(divWrapper);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+      }
 
       // Send message
       async function sendMessage() {
@@ -218,6 +186,4 @@ Constraints:
     </script>
   </body>
 </html>
-
-
 
